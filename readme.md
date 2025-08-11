@@ -3,7 +3,6 @@
 This project consists of two main components:
 
 -   `form-elements.html`: A single-page web application that demonstrates various HTML form elements within a modern, dark-themed UI. It features an interactive event log that provides real-time feedback on user interactions.
--   `form-elements-tester.user.js`: A Tampermonkey script designed to automate the testing of all interactive elements on the `form-elements.html` page.
 -   `form-elements-automated-tester.js`: A Tampermonkey script designed to automate the testing of all interactive elements on the `form-elements.html` page.
 
 ## `form-elements.html` Features
@@ -19,8 +18,6 @@ This project consists of two main components:
 -   **Controlled Execution**: Allows you to trigger the test sequence manually.
 -   **Comprehensive Coverage**: Interacts with every form element, including text inputs, labels, checkboxes, radio buttons, select dropdowns, and buttons.
 -   **Visual Feedback**: Pauses between actions, allowing you to observe the results in the page's Event Log and verify that all event listeners are working correctly.
-
----
 
 ## Setup and Usage
 
