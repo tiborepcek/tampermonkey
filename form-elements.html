@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clickable Elements in a Form</title>
+    <style>
+        :root {
+            --bg-color-main: #121212;
+            --bg-color-surface: #1e1e1e;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #888;
+            --text-color-log: #c9d1d9;
+            --border-color: #444;
+            --border-color-input: #555;
+            --accent-color: #58a6ff;
+            --button-bg-primary: #0d6efd;
+            --button-bg-primary-hover: #0b5ed7;
+            --button-bg-secondary: #495057;
+            --button-bg-secondary-hover: #5c636a;
+            --input-bg-color: #333;
+            --shadow-color: rgba(0,0,0,0.5);
+            --focus-outline-color: var(--accent-color);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color-main);
+            color: var(--text-color-primary);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .main-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container {
+            flex: 2;
+            background: var(--bg-color-surface);
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .output-container {
+            flex: 1;
+            background: var(--bg-color-surface);
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            position: sticky;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(90vh - 40px); /* Account for body's 20px top/bottom padding */
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .output-header h2 {
+            margin: 0;
+        }
+        #clear-log-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: var(--button-bg-secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #clear-log-btn:hover {
+            background-color: var(--button-bg-secondary-hover);
+        }
+        #output-log {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color-main);
+            padding: 15px;
+            border-radius: 4px;
+            flex-grow: 1; /* Allow log to fill available space */
+            min-height: 0; /* Prevent flexbox overflow issues with scrollable content */
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-color-log);
+            font-size: 0.9rem;
+        }
+        /* Custom Scrollbar for Webkit browsers */
+        #output-log::-webkit-scrollbar {
+            width: 10px;
+        }
+        #output-log::-webkit-scrollbar-track {
+            background: var(--bg-color-main);
+        }
+        #output-log::-webkit-scrollbar-thumb {
+            background-color: var(--border-color-input);
+            border-radius: 5px;
+            border: 2px solid var(--bg-color-main);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        fieldset {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 20px;
+        }
+        legend {
+            padding: 0 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        label {
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px; /* Spacing from label */
+            border: 1px solid var(--border-color-input);
+            border-radius: 4px;
+            background-color: var(--input-bg-color);
+            color: var(--text-color-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--accent-color);
+        }
+        input::placeholder {
+            color: var(--text-color-secondary);
+        }
+
+        /* Accessibility: Add a clear focus indicator for keyboard users */
+        *:focus-visible {
+            outline: 3px solid var(--focus-outline-color);
+            outline-offset: 2px;
+        }
+
+        /* Structure: Container for checkbox/radio groups to replace <br> tags */
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .choice-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button,
+        input[type="button"],
+        input[type="submit"],
+        input[type="reset"] {
+            background-color: var(--button-bg-primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        button:hover,
+        input[type="button"]:hover,
+        input[type="submit"]:hover,
+        input[type="reset"]:hover {
+            background-color: var(--button-bg-primary-hover);
+        }
+        input[type="reset"] {
+            background-color: var(--button-bg-secondary);
+        }
+        input[type="reset"]:hover {
+            background-color: var(--button-bg-secondary-hover);
+        }
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        details {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+        }
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="main-layout">
+        <div class="container">
+            <h1>Clickable Elements Form</h1>
+            
+            <form>
+
+                <fieldset>
+                    <legend>Text Input with Clickable Label</legend>
+                    <label for="name">Click here to focus on the name input:</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your name" required minlength="2">
+                </fieldset>
+
+                <fieldset>
+                    <legend>Checkboxes & Radio Buttons</legend>
+                    <div class="choices-container">
+                        <div class="choice-item">
+                            <!-- The 'required' attribute ensures this must be checked -->
+                            <input type="checkbox" id="terms" name="terms" value="agree" required>
+                            <label for="terms">I agree to the terms (checkbox)</label>
+                        </div>
+                        <div class="choice-item">
+                            <input type="radio" id="yes" name="subscribe" value="yes" checked>
+                            <label for="yes">Yes, subscribe me (radio)</label>
+                        </div>
+                        <div class="choice-item">
+                            <input type="radio" id="no" name="subscribe" value="no">
+                            <label for="no">No, thank you (radio)</label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Dropdown & Details</legend>
+                    <label for="options">Choose an option:</label>
+                    <select id="options" name="options" required>
+                        <option value="" disabled selected>-- Please choose an option --</option>
+                        <option value="1">Option 1</option>
+                        <option value="2">Option 2</option>
+                    </select>
+                    
+                    <details>
+                        <summary>Click to see more details</summary>
+                        <p>This content is revealed when the summary is clicked.</p>
+                    </details>
+                </fieldset>
+                
+                <fieldset>
+                    <legend>Form Actions</legend>
+                    <div class="button-group">
+                        <input type="reset" value="Reset Form">
+                        <input type="submit" value="Submit Form">
+                    </div>
+                </fieldset>
+
+            </form>
+        </div>
+
+        <div class="output-container">
+            <div class="output-header">
+                <h2>Event Log</h2>
+                <button type="button" id="clear-log-btn" title="Clear the event log">Clear</button>
+            </div>
+            <pre id="output-log">Click any element in the form to see details here.</pre>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Caching ---
+            const form = document.querySelector('form');
+            const outputLog = document.getElementById('output-log');
+            const clearLogBtn = document.getElementById('clear-log-btn');
+            const initialLogText = 'Click any element in the form to see details here.';
+
+            // --- Core Functions ---
+            const logMessage = (message) => {
+                const timestamp = new Date().toLocaleString();
+                const newLogEntry = `[${timestamp}]\n${message}`;
+
+                if (outputLog.textContent === initialLogText) {
+                    outputLog.textContent = newLogEntry;
+                } else {
+                    outputLog.textContent = newLogEntry + '\n\n' + outputLog.textContent;
+                }
+            };
+
+            // --- Event Listeners ---
+
+            // Use event delegation on the form for most click events
+            form.addEventListener('click', (event) => {
+                const { target } = event;
+
+                // Clicks on the summary are handled by the more reliable 'toggle' event on the <details> parent.
+                if (target.tagName === 'SUMMARY') return;
+
+                // Ignore clicks on the select element itself, as the 'change' event is more meaningful.
+                if (target.tagName === 'SELECT') return;
+
+                // Use an array to build the description conditionally, which is cleaner than multiple `+=`
+                const descriptionParts = [
+                    `Element: <${target.tagName.toLowerCase()}>`,
+                    target.id && `ID: #${target.id}`,
+                    target.type && `Type: ${target.type}`,
+                    target.name && `Name: ${target.name}`
+                ];
+
+                if (target.tagName === 'LABEL' && target.htmlFor) {
+                    descriptionParts.push(`Action: Focused input #${target.htmlFor}.`);
+                } else if (target.type === 'checkbox' || target.type === 'radio') {
+                    descriptionParts.push(`Checked: ${target.checked}`);
+                } else if (target.type === 'submit' || target.type === 'reset') {
+                    descriptionParts.push(`Action: Button was clicked.`);
+                }
+
+                // Filter out any null/undefined parts (from the conditional &&) and join.
+                logMessage(descriptionParts.filter(Boolean).join('\n'));
+            });
+
+            // Listen for specific element events that don't bubble as clicks
+            form.querySelector('#options').addEventListener('change', (event) => {
+                const description = `Element: <select>
+ID: #options
+Action: Changed value.
+Selected: "${event.target.value}"`;
+                logMessage(description);
+            });
+
+            // Listen for the details element toggling, which is more robust than a click on the summary.
+            // This also captures keyboard toggles (e.g., using the spacebar).
+            form.querySelector('details').addEventListener('toggle', (event) => {
+                const { target: detailsElement } = event;
+                const description = `Element: <details>
+Action: Toggled visibility.
+State: ${detailsElement.open ? 'Open' : 'Closed'}`;
+                logMessage(description);
+            });
+
+            // Listen for the form's own events (submit and reset)
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent actual submission for this demo
+                const description = `Event: 'submit'
+Action: Form submission triggered.
+(Page reload prevented for demo)`;
+                logMessage(description);
+            });
+
+            form.addEventListener('reset', () => {
+                // Use a timeout to log after the reset has visually occurred
+                setTimeout(() => {
+                    logMessage(`Event: 'reset'\nAction: Form fields were reset.`);
+                }, 0);
+            });
+
+            // Listener for the "Clear" button in the log panel
+            clearLogBtn.addEventListener('click', () => {
+                outputLog.textContent = initialLogText;
+            });
+        });
+    </script>
+</body>
+</html>
